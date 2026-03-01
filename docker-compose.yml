@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    container_name: seadoc-backend
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: seadoc-frontend
+    ports:
+      - "5173:5173"
+
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: seadoc-nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./nginx/data:/data
+      - ./nginx/letsencrypt:/etc/letsencrypt
