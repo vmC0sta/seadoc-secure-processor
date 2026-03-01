@@ -1,51 +1,87 @@
-SeaDoc Secure Processor
-A document processing and conversion system focused on privacy and security. The application allows for isolated conversion of Word, Excel, and Image files to PDF format using Docker containers.
+# SeaDoc Secure Processor
 
-System Architecture
-The project is divided into three main layers:
+A production-ready document conversion system designed with a focus on privacy, security, and containerized microservices. This project demonstrates a full-stack implementation using modern tools to handle sensitive document processing in an isolated environment.
 
-Frontend (Vue.js 3 + Vite + Tailwind CSS): A responsive user interface that manages file uploads and handles binary blobs for automatic browser downloads.
+---
 
-Backend (FastAPI + Python): An API that processes conversions using libraries such as img2pdf for images and the LibreOffice headless engine for office documents.
+## Technical Architecture
 
-Proxy (Nginx Proxy Manager): Manages external traffic, port forwarding, and SSL encryption (HTTPS).
+The application is architected into three decoupled layers to ensure scalability and security:
 
-Conversion Features
-Word to PDF: Supports .doc and .docx files via lowriter.
+| Component | Technology | Role |
+| --- | --- | --- |
+| **Frontend** | Vue.js 3 / Vite | Responsive UI & Binary Stream Handling |
+| **Backend** | FastAPI / Python 3.10 | Business Logic & PDF Generation |
+| **Proxy** | Nginx Proxy Manager | SSL (HTTPS) Termination & Reverse Proxy |
+| **Infrastructure** | Docker / Compose | Container Orchestration & Networking |
 
-Excel to PDF: Supports .xls, .xlsx, and .ods files via libreoffice.
+---
 
-JPG to PDF: Direct conversion of .jpg, .jpeg, and .png images while preserving original quality.
+## Core Features & Highlights
 
-System Requirements
-Docker and Docker Compose installed.
+* **Isolated Conversions:** Leveraging **LibreOffice Headless** and **img2pdf** inside Linux containers to ensure complex document rendering without a GUI.
+* **Secure Networking:** Implemented a **Reverse Proxy** with **Nginx Proxy Manager**, managing encrypted traffic (SSL/TLS) via Let's Encrypt.
+* **Privacy-First:** Files are processed in ephemeral `/tmp` storage. No data is stored permanently; documents are streamed directly to the user as binary blobs.
+* **Modern Frontend:** Built with **Tailwind CSS** for a clean, professional UI, and **Vite** for optimized build performance.
 
-Network connectivity on ports 80, 81 (admin panel), and 443.
+---
 
-Installation and Setup
-Clone the repository:
+## Project Structure
 
-Bash
+```text
+seadoc/
+├── backend/            # FastAPI application, LibreOffice & Dockerfile
+├── frontend/           # Vue.js source code, Tailwind config & Vite
+├── nginx/              # Proxy data & SSL certificate volumes
+└── docker-compose.yml  # Main orchestration for microservices
+
+```
+
+---
+
+## Installation and Deployment
+
+### Prerequisites
+
+* Docker and Docker Compose installed.
+* Ports 80, 81, and 443 open on your host/firewall.
+
+### Setup
+
+1. **Clone the repository:**
+```bash
 git clone https://github.com/vmC0sta/seadoc-secure-processor.git
 cd seadoc-secure-processor
-Deploy the services via Docker Compose:
 
-Bash
+```
+
+
+2. **Deploy the stack:**
+```bash
 docker-compose up -d --build
-Configure the Proxy Host in Nginx Proxy Manager (Port 81):
 
-Domain Name: seadoc.duckdns.org (or your custom domain).
+```
 
-Forward Host/IP: 172.17.0.1 (Docker Gateway IP).
 
-Forward Port: 5173.
+3. **Configure the Domain:**
+Access the Nginx Admin Panel at `http://your-ip:81` to map your domain (e.g., `seadoc.duckdns.org`) to the frontend service on port `5173`.
 
-Technical Implementation Details
-Backend (Python/FastAPI)
-The backend utilizes subprocesses to invoke system-level command-line tools (LibreOffice), ensuring that complex documents maintain their original formatting during conversion. Temporary files are processed within the container's /tmp directory, ensuring data isolation.
+---
 
-Frontend (Vue.js)
-The application uses the Fetch API for asynchronous communication with the backend. Download processing is handled via window.URL.createObjectURL, allowing the browser to treat the binary data stream (PDF) as a physical file download immediately after conversion.
+## Technical Implementation Details
 
-Security and Privacy
-Processing occurs within ephemeral containers. Unlike public online converters, documents processed in SeaDoc are not stored permanently; they are discarded immediately after the response stream is generated for the client.
+### API Design
+
+The backend uses **FastAPI** for its high performance and native support for asynchronous requests. Document conversion is handled via system-level subprocess calls, ensuring that Word (`.docx`) and Excel (`.xlsx`) files maintain 1:1 formatting accuracy when exported to PDF.
+
+### Frontend Data Handling
+
+Instead of simple links, the frontend utilizes the **Fetch API** to process binary responses. It generates a temporary `blob` URL to trigger an immediate, secure download of the generated PDF without exposing internal server paths.
+
+### Security
+
+SSL certificates are managed automatically. By using a dedicated Nginx container, the application is shielded from direct external access, exposing only the strictly necessary ports.
+
+---
+
+*Developed by vmC0sta - 2026*
