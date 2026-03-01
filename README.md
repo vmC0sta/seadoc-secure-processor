@@ -84,4 +84,4 @@ SSL certificates are managed automatically. By using a dedicated Nginx container
 
 ---
 
-*Developed by vmC0sta - 2026*
+*Developed by vmC0sta - 2026.*
